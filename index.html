@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>Central TV — Canais ao vivo</title>
+<style>
+:root{--bg:#0b1020;--panel:#121b2d;--panel2:#17243a;--line:#263650;--text:#f4f7fb;--muted:#a5b2c7;--blue:#4387ff;--red:#ff5364}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(16px,4vw,44px);background:#0b1020ed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px;font-size:20px}.brand-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4387ff,#6a5cff);font-size:22px}.brand span{color:#6fa1ff}
+.header-right{display:flex;align-items:center;gap:8px;color:#ff7a86;font-size:12px;font-weight:800;letter-spacing:.8px}.dot{width:8px;height:8px;background:var(--red);border-radius:50%;box-shadow:0 0 12px #ff5364}
+main{width:min(1240px,100%);margin:auto;padding:28px 18px 48px}
+.intro{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}.eyebrow{color:#80aaff;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1.5px}.intro h1{font-size:clamp(26px,4vw,38px);line-height:1.12;margin:5px 0 8px}.intro p{color:var(--muted);margin:0;max-width:660px}
+.player{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 18px 55px #0003}.player-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px}.now{display:flex;align-items:center;gap:12px;min-width:0}.now-icon{width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;border-radius:12px;background:var(--panel2);font-size:23px}.now h2{font-size:16px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.now p{margin:2px 0 0;color:var(--muted);font-size:12px}.source-status{font-size:11px;color:#b5c4d9;border:1px solid var(--line);padding:5px 9px;border-radius:999px;white-space:nowrap}
+.screen{position:relative;aspect-ratio:16/9;background:#03060c;display:grid;place-items:center;overflow:hidden}.screen iframe,.screen video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.empty{max-width:490px;text-align:center;padding:24px}.empty .big{font-size:42px}.empty h3{font-size:19px;margin:8px 0}.empty p{color:var(--muted);margin:0 0 16px;font-size:13px}.small-btn,.primary-btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;font-weight:700}.primary-btn{background:var(--blue);border-color:var(--blue);color:white}.notice{padding:11px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:27px 0 22px}.search-wrap{position:relative;flex:1;min-width:190px}.search-wrap span{position:absolute;left:13px;top:10px;color:var(--muted)}.search-wrap input{padding-left:38px;width:100%}input,select{background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--text);padding:11px 13px;outline:none}input:focus,select:focus{border-color:var(--blue)}select{min-width:170px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 13px}.section-title h2{font-size:19px;margin:0}.count{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.channel{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:135px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);transition:transform .15s,border-color .15s,background .15s}.channel:hover{transform:translateY(-2px);border-color:#527dc4}.channel.active{border-color:var(--blue);background:#142746;box-shadow:inset 0 0 0 1px #4387ff44}.channel-top{width:100%;display:flex;justify-content:space-between;align-items:center}.channel-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:var(--panel2);font-size:24px}.tag{font-size:9px;text-transform:uppercase;font-weight:800;letter-spacing:.5px;color:#9fc0ff;background:#20375b;padding:4px 6px;border-radius:6px}.channel-name{font-weight:800;margin-top:12px;font-size:14px}.channel-cat{font-size:11px;color:var(--muted);margin-top:3px}.empty-results{padding:22px;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.guide{margin-top:30px;border:1px solid var(--line);border-radius:16px;padding:18px;background:#10192a}.guide h2{font-size:17px;margin:0 0 8px}.guide p,.guide li{font-size:13px;color:var(--muted)}.guide code{color:#c7d8ff;background:#202e45;padding:2px 5px;border-radius:5px}.guide a{color:#8db5ff}
+footer{text-align:center;color:#7f8da4;font-size:12px;padding:24px 16px;border-top:1px solid var(--line)}
+@media(max-width:600px){header{padding:11px 14px}.brand{font-size:17px}.brand-icon{width:36px;height:36px}.header-right{font-size:10px}main{padding:22px 12px 35px}.intro{display:block}.intro p{font-size:13px}.player-head{padding:12px}.source-status{font-size:10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.channel{padding:12px;min-height:126px}.toolbar select{flex:1;min-width:130px}.screen{aspect-ratio:16/9}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="brand-icon">📺</div><div>CENTRAL <span>TV</span></div></div>
+  <div class="header-right"><i class="dot"></i> GUIA DE CANAIS</div>
+</header>
+<main>
+  <section class="intro">
+    <div><div class="eyebrow">Sua programação em um só lugar</div><h1>Canais ao vivo</h1><p>Escolha um canal para abrir sua transmissão. A reprodução depende de uma fonte oficial ou autorizada e das permissões de incorporação da emissora.</p></div>
+  </section>
+html
+  <section class="player" aria-label="Player de vídeo">
+    <div class="player-head">
+      <div class="now"><div class="now-icon" id="nowIcon">📺</div><div><h2 id="nowTitle">Bem-vindo à Central TV</h2><p id="nowSubtitle">Selecione um canal na lista abaixo</p></div></div>
+      <span class="source-status" id="sourceStatus">AGUARDANDO CANAL</span>
+    </div>
+    <div class="screen" id="screen">
+      <div class="empty" id="emptyState"><div class="big">▶</div><h3>Escolha o que assistir</h3><p>Use a busca ou filtre por categoria. Os canais sem fonte configurada mostrarão instruções para adicionar um link autorizado.</p></div>
+    </div>
+    <div class="notice">Dica: algumas emissoras bloqueiam players externos. Se o vídeo não abrir, use o botão de acesso ao site oficial, quando disponível.</div>
+  </section>
+
+  <div class="toolbar">
+    <div class="search-wrap"><span>⌕</span><input id="search" type="search" placeholder="Buscar canal..." aria-label="Buscar canal"></div>
+    <select id="category" aria-label="Filtrar categoria"><option value="Todas">Todas as categorias</option><option>TV pública</option><option>Notícias</option><option>Entretenimento</option><option>Documentários</option><option>Esportes</option><option>YouTube oficial</option><option>Meus canais</option></select>
+  </div>
+
+  <div class="section-title"><h2>Explorar canais</h2><span class="count" id="count"></span></div>
+  <div class="grid" id="channelGrid"></div>
+
+  <section class="guide">
+    <h2>Como adicionar uma transmissão</h2>
+    <p>Edite a lista <code>const channels</code> neste arquivo. Preencha <code>embedUrl</code> com um endereço de incorporação oficial permitido pela emissora. Para vídeos do YouTube, use o formato <code>https://www.youtube.com/embed/ID_DO_VIDEO</code> quando a transmissão permitir incorporação.</p>
+    <p>Não coloque senhas, cookies, tokens privados ou credenciais neste arquivo. Tudo o que for publicado no GitHub Pages fica acessível publicamente.</p>
+  </section>
+</main>
+<footer>Central TV · Interface independente · Utilize apenas transmissões oficiais ou autorizadas</footer>
+
+<script>
+/*
+  GUIA DE CONFIGURAÇÃO:
+  - embedUrl: URL oficial de incorporação (não é necessariamente a página do canal).
+  - siteUrl: página oficial para abrir fora do player.
+  - As entradas abaixo são modelos de categorias e NÃO afirmam que exista uma transmissão ativa.
+*/
+const channels = [
+  {name:"TV Brasil",category:"TV pública",icon:"🇧🇷",embedUrl:"",siteUrl:"https://tvbrasil.ebc.com.br/"},
+  {name:"TV Câmara",category:"TV pública",icon:"🏛️",embedUrl:"",siteUrl:"https://www.camara.leg.br/tv/"},
+  {name:"TV Senado",category:"TV pública",icon:"🏛️",embedUrl:"",siteUrl:"https://www12.senado.leg.br/tv"},
+  {name:"Canal Gov",category:"TV pública",icon:"🇧🇷",embedUrl:"",siteUrl:"https://www.gov.br/secom/pt-br"},
+  {name:"TV Justiça",category:"TV pública",icon:"⚖️",embedUrl:"",siteUrl:"https://www.tvjustica.jus.br/"},
+  {name:"Canal Saúde",category:"TV pública",icon:"➕",embedUrl:"",siteUrl:"https://www.canalsaude.fiocruz.br/"},
+  {name:"Agência Brasil",category:"Notícias",icon:"📰",embedUrl:"",siteUrl:"https://agenciabrasil.ebc.com.br/"},
+  {name:"Jornalismo",category:"Notícias",icon:"🌐",embedUrl:"",siteUrl:""},
+  {name:"Notícias internacionais",category:"Notícias",icon:"🌍",embedUrl:"",siteUrl:""},
+  {name:"Cultura",category:"Entretenimento",icon:"🎭",embedUrl:"",siteUrl:""},
+  {name:"Música",category:"Entretenimento",icon:"🎵",embedUrl:"",siteUrl:""},
+  {name:"Cinema",category:"Entretenimento",icon:"🎬",embedUrl:"",siteUrl:""},
+  {name:"Discovery",category:"Documentários",icon:"🌎",embedUrl:"",siteUrl:"https://www.discovery.com/"},
+  {name:"Natureza",category:"Documentários",icon:"🦁",embedUrl:"",siteUrl:""},
+  {name:"Ciência",category:"Documentários",icon:"🔬",embedUrl:"",siteUrl:""},
+  {name:"Esportes",category:"Esportes",icon:"⚽",embedUrl:"",siteUrl:""},
+  {name:"YouTube ao vivo 1",category:"YouTube oficial",icon:"▶️",embedUrl:"",siteUrl:"https://www.youtube.com/live"},
+  {name:"YouTube ao vivo 2",category:"YouTube oficial",icon:"▶️",embedUrl:"",siteUrl:"https://www.youtube.com/live"},
+  {name:"Meu canal 1",category:"Meus canais",icon:"⭐",embedUrl:"",siteUrl:""},
+  {name:"Meu canal 2",category:"Meus canais",icon:"⭐",embedUrl:"",siteUrl:""}
+];
+
+const grid = document.getElementById("channelGrid");
+const search = document.getElementById("search");
+const category = document.getElementById("category");
+const screen = document.getElementById("screen");
+const nowTitle = document.getElementById("nowTitle");
+const nowSubtitle = document.getElementById("nowSubtitle");
+const nowIcon = document.getElementById("nowIcon");
+const sourceStatus = document.getElementById("sourceStatus");
+let selected = -1;
+
+function render() {
+  const term = search.value.trim().toLocaleLowerCase("pt-BR");
+  const cat = category.value;
+  const filtered = channels.map((c,i)=>({...c,index:i})).filter(c =>
+    c.name.toLocaleLowerCase("pt-BR").includes(term) &&
+    (cat === "Todas" || c.category === cat)
+  );
+  grid.replaceChildren();
+  document.getElementById("count").textContent = `${filtered.length} canais`;
+  if (!filtered.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-results";
+    empty.textContent = "Nenhum canal encontrado. Tente outro nome ou categoria.";
+    grid.appendChild(empty);
+    return;
+  }
+  filtered.forEach(c => {
+    const button = document.createElement("button");
+    button.className = "channel" + (selected === c.index ? " active" : "");
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(selected === c.index));
+    const top = document.createElement("div"); top.className = "channel-top";
+    const icon = document.createElement("div"); icon.className = "channel-icon"; icon.textContent = c.icon;
+    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = c.embedUrl ? "Disponível" : "Configurar";
+    top.append(icon,tag);
+    const name = document.createElement("div"); name.className = "channel-name"; name.textContent = c.name;
+    const catEl = document.createElement("div"); catEl.className = "channel-cat"; catEl.textContent = c.category;
+    button.append(top,name,catEl);
+    button.addEventListener("click",()=>selectChannel(c.index));
+    grid.appendChild(button);
+  });
+}
+
+function selectChannel(index) {
+  const c = channels[index];
+  selected = index;
+  nowTitle.textContent = c.name;
+  nowSubtitle.textContent = c.category;
+  nowIcon.textContent = c.icon;
+  screen.replaceChildren();
+
+  if (c.embedUrl) {
+    // Permite incorporar apenas URLs HTTPS configuradas no próprio arquivo.
+    let parsed;
+    try { parsed = new URL(c.embedUrl); } catch { parsed = null; }
+    if (!parsed || parsed.protocol !== "https:") {
+      showMessage(c, "Endereço inválido", "Use um endereço HTTPS oficial de incorporação.");
+      sourceStatus.textContent = "VERIFICAR FONTE";
+    } else {
+      const frame = document.createElement("iframe");
+      frame.src = parsed.href;
+      frame.title = c.name;
+      frame.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = "strict-origin-when-cross-origin";
+      frame.loading = "lazy";
+      screen.appendChild(frame);
+      sourceStatus.textContent = "FONTE EXTERNA";
+    }
+  } else {
+    showMessage(c, "Transmissão não configurada", "Adicione o endereço oficial de incorporação no campo embedUrl deste arquivo.");
+    sourceStatus.textContent = "CONFIGURAR CANAL";
+  }
+  render();
+}
+
+function showMessage(c, title, message) {
+  const box = document.createElement("div"); box.className = "empty";
+  const big = document.createElement("div"); big.className = "big"; big.textContent = c.icon;
+  const h = document.createElement("h3"); h.textContent = title;
+  const p = document.createElement("p"); p.textContent = message;
+  box.append(big,h,p);
+  if (c.siteUrl) {
+    const link = document.createElement("a");
+    link.className = "primary-btn"; link.textContent = "Abrir site oficial";
+    link.href = c.siteUrl; link.target = "_blank"; link.rel = "noopener noreferrer";
+    link.style.display = "inline-block"; link.style.textDecoration = "none";
+    box.appendChild(link);
+  }
+  screen.appendChild(box);
+}
+search.addEventListener("input",render);
+category.addEventListener("change",render);
+render();
+</script>
+</body>
+</html>
