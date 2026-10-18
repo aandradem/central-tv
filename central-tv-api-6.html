@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020"><title>Central TV</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151f32;--line:#2a3952;--muted:#a5b2c7;--blue:#4387ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f7fb;font:15px system-ui,Arial}header{padding:16px 5%;background:#111a2b;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}header strong{font-size:21px}header b{color:#77a5ff}main{max-width:1200px;margin:auto;padding:24px 16px}p,.muted{color:var(--muted)}.player,.card,.epgbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.playerhead{padding:14px 16px;display:flex;justify-content:space-between;gap:10px}.screen{aspect-ratio:16/9;background:#03060c;display:grid;place-items:center;text-align:center;padding:20px}.screen iframe{width:100%;height:100%;border:0;grid-area:1/1}.screen .msg{max-width:500px}.note{padding:10px 15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.tools{display:flex;gap:10px;margin:24px 0;flex-wrap:wrap}input,select{background:var(--panel);border:1px solid var(--line);color:white;border-radius:9px;padding:12px;font:inherit}input{flex:1;min-width:180px}.tabs{display:flex;gap:8px;margin:20px 0}.tabs button,.btn{border:1px solid var(--line);background:var(--panel);color:white;padding:9px 13px;border-radius:9px;cursor:pointer}.tabs .active,.btn{background:var(--blue);border-color:var(--blue)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}.card{padding:13px;cursor:pointer;text-align:left;color:white;min-height:120px}.card:hover,.card.active{border-color:var(--blue)}.logo{width:42px;height:42px;object-fit:contain;background:#23334d;border-radius:9px;padding:3px}.name{font-weight:750;margin-top:10px}.muted{font-size:12px}.epg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.epgbox{padding:13px}.hidden{display:none!important}a{color:#a8c7ff}@media(max-width:550px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.epg{grid-template-columns:1fr}main{padding:18px 12px}}
+</style></head>
+<body>
+<header><strong>📺 CENTRAL <b>TV</b></strong><span id="health" class="muted">Conectando à API…</span></header>
+<main>
+<h1>Canais ao vivo</h1><p>Explore canais, eventos esportivos e programação (EPG). A reprodução só é liberada para fontes que você autorizar.</p>
+<section class="player"><div class="playerhead"><strong id="now">Selecione um canal ou evento</strong><span id="status" class="muted">PRONTO</span></div><div class="screen" id="screen"><div class="msg"><div style="font-size:40px">▶</div><h3>Central TV</h3><p>Escolha um item abaixo para ver detalhes e programação.</p></div></div><div class="note">Use somente transmissões oficiais/licenciadas. A existência de um embed na API não comprova autorização de redistribuição.</div></section>
+<div class="tabs"><button class="active" data-view="channels">Canais de TV</button><button data-view="sports">Eventos esportivos</button></div>
+<div class="tools"><input id="q" placeholder="Buscar canal, evento ou equipe…"><select id="cat"><option value="">Todas as categorias</option></select><select id="sportStatus" class="hidden"><option value="live">Ao vivo</option><option value="upcoming">Em breve</option><option value="finished">Encerrados</option><option value="">Todos</option></select></div>
+<h2 id="heading">Canais disponíveis <span id="count" class="muted"></span></h2><div id="list" class="grid"></div>
+<section id="epgSection" class="hidden"><h2>Programação</h2><div id="epg" class="epg"></div></section>
+</main>
+<script>
+const API="https://api.reidoscanais.si";
+/* Adicione somente hostnames de players cuja incorporação você tem autorização para usar. */
+const ALLOWED_EMBED_HOSTS=[
+  // "player.emissora-oficial.com.br",
+  // "www.youtube-nocookie.com"
+];
+let view="channels",channels=[],events=[],selected=null;
+const $=id=>document.getElementById(id);
+function urlHTTPS(s){try{let u=new URL(s);return u.protocol==="https:"?u:null}catch{return null}}
+function approved(s){let u=urlHTTPS(s);return u&&ALLOWED_EMBED_HOSTS.includes(u.hostname.toLowerCase())?u:null}
+async function get(path){let r=await fetch(API+path,{headers:{Accept:"application/json"}});if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
+function el(tag,cls,txt){let n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
+function setHealth(ok,msg){$("health").textContent=msg;$("health").style.color=ok?"#6ee7b7":"#fb7185"}
+function setEpg(epg){$("epg").replaceChildren();if(!epg||(!epg.current&&!epg.next)){$("epgSection").classList.add("hidden");return}
+$("epgSection").classList.remove("hidden");[["Agora",epg.current],["A seguir",epg.next]].forEach(([label,p])=>{if(!p)return;let box=el("div","epgbox");box.append(el("div","muted",label),el("strong","",p.title||"Programa não informado"));if(p.formatted_time)box.append(el("div","muted",p.formatted_time));if(p.description)box.append(el("p","muted",p.description));$("epg").append(box)})}
+function selectItem(item){selected=item;$("now").textContent=item.name||item.title||"Transmissão";$("screen").replaceChildren();let source=(item.embeds||[]).find(x=>approved(x.embed_url));
+if(source){let frame=document.createElement("iframe");frame.src=approved(source.embed_url).href;frame.title=item.name||item.title||"Player";frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";$("screen").append(frame);$("status").textContent="FONTE AUTORIZADA"}
+else{let box=el("div","msg");box.append(el("div","","📺"),el("h3","","Reprodução não habilitada"),el("p","muted",(item.embeds||[]).length?"Há embeds listados, mas nenhum domínio foi autorizado na configuração ALLOWED_EMBED_HOSTS. Confirme a licença antes de autorizar.":"Este item não possui embed cadastrado."));let official=urlHTTPS(item.website||item.site_url||item.url);if(official){let a=el("a","btn","Abrir site oficial");a.href=official.href;a.target="_blank";a.rel="noopener noreferrer";box.append(a)}$("screen").append(box);$("status").textContent="CONFIGURAR FONTE"}
+setEpg(view==="channels"?item.epg:null);render()}
+function render(){let q=$("q").value.trim().toLocaleLowerCase("pt-BR"),cat=$("cat").value,items=(view==="channels"?channels:events).filter(x=>{let name=(x.name||x.title||"").toLocaleLowerCase("pt-BR"),extra=[x.description,x.category,x.competition,x.teams?.home?.name,x.teams?.away?.name].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");return(!q||name.includes(q)||extra.includes(q))&&(!cat||x.category===cat)});
+$("count").textContent="("+items.length+")";$("list").replaceChildren();if(!items.length){$("list").append(el("p","muted","Nenhum resultado encontrado ou a API não retornou itens."));return}
+items.forEach(item=>{let b=el("button","card"+(selected&&selected.id===item.id?" active":""));b.type="button";let imgUrl=urlHTTPS(item.logo_url||item.poster),top=el("div","");if(imgUrl){let img=document.createElement("img");img.className="logo";img.src=imgUrl.href;img.alt="";img.loading="lazy";top.append(img)}else top.append(el("span","","📺"));b.append(top,el("div","name",item.name||item.title||"Sem nome"),el("div","muted",[item.category,item.competition].filter(Boolean).join(" · ")||"Categoria não informada"));if(item.start_time)b.append(el("div","muted",item.start_time));b.addEventListener("click",()=>selectItem(item));$("list").append(b)})}
+function categories(){let items=view==="channels"?channels:events,vals=[...new Set(items.map(x=>x.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR")),sel=$("cat"),old=sel.value;sel.replaceChildren(new Option("Todas as categorias",""));vals.forEach(x=>sel.add(new Option(x,x)));if(vals.includes(old))sel.value=old}
+async function loadChannels(){let d=await get("/channels");channels=Array.isArray(d.data)?d.data:[];categories();render()}
+async function loadSports(){let s=$("sportStatus").value,qs=new URLSearchParams();if(s)qs.set("status",s);let d=await get("/sports"+(qs.toString()?"?"+qs:""));events=Array.isArray(d.data)?d.data:[];categories();render()}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",async()=>{document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x===b));view=b.dataset.view;$("sportStatus").classList.toggle("hidden",view!=="sports");$("heading").firstChild.textContent=view==="channels"?"Canais disponíveis ":"Eventos esportivos ";$("epgSection").classList.add("hidden");try{if(view==="channels")await loadChannels();else await loadSports()}catch{$("list").replaceChildren(el("p","muted","Não foi possível carregar os dados. A API pode estar fora do ar ou bloquear solicitações do navegador (CORS)."))}}));
+$("q").addEventListener("input",render);$("cat").addEventListener("change",render);$("sportStatus").addEventListener("change",()=>loadSports().catch(()=>{}));
+(async()=>{try{await get("/health");setHealth(true,"API operacional")}catch{setHealth(false,"API indisponível ou sem acesso")}try{await loadChannels()}catch{setHealth(false,"Falha ao carregar canais");$("list").append(el("p","muted","Verifique se a API está online e permite CORS para páginas hospedadas no GitHub Pages."))}})();
+</script></body></html>
